@@ -1,6 +1,6 @@
-package edu.gatech.cs3220.spring2022.motorolla68k.qarma
+package edu.gatech.cs3220.spring2022.motorolla68k.qarma64
 
-object Qarma64 {
+object Qarma {
 
   /** Default value for alpha See: https://eprint.iacr.org/2016/444.pdf Table 1
     */
@@ -42,12 +42,12 @@ object Qarma64 {
   * @param c
   *   The sequence of round keys
   */
-class Qarma64(
+class Qarma(
     val rounds: Int,
     val k0: Seq[Byte],
     val k1: Seq[Byte],
     val w0: Seq[Byte],
     val w1: Seq[Byte],
-    val a: Seq[Byte] = Qarma64.REFLECTION_CONSTANT,
-    val c: Seq[Seq[Byte]] = Qarma64.ROUND_KEYS
+    val a: Seq[Byte] = Qarma.REFLECTION_CONSTANT,
+    val c: Seq[Seq[Byte]] = Qarma.ROUND_KEYS
 ) {}
