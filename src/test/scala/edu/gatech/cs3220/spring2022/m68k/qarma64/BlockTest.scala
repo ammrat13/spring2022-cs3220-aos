@@ -9,7 +9,7 @@ class BlockTest extends AnyFlatSpec with Matchers {
 
   "A block" should "take sixteen cells as input" in {
     withClue("Can't take in exactly sixteen cells.") {
-      noException should be thrownBy Block(Seq.fill(16)(new Cell(0)))
+      noException should be thrownBy (new Block(Seq.fill(16)(new Cell(0))))
     }
     withClue("Can take in fewer than sixteen cells.") {
       an[IllegalArgumentException] should be thrownBy (new Block(
@@ -20,6 +20,31 @@ class BlockTest extends AnyFlatSpec with Matchers {
       an[IllegalArgumentException] should be thrownBy (new Block(
         Seq.fill(17)(new Cell(0))
       ))
+    }
+  }
+
+  it should "be constructable from eight bytes" in {
+    withClue("Can't take in exactly eight bytes.") {
+      noException should be thrownBy (Block.fromBytes(Seq.fill(8)(0x00.toByte)))
+    }
+    withClue("Can take in fewer than eight bytes.") {
+      an[IllegalArgumentException] should be thrownBy (Block.fromBytes(
+        Seq.fill(7)(0x00.toByte)
+      ))
+    }
+    withClue("Can take in more than eight bytes.") {
+      an[IllegalArgumentException] should be thrownBy (Block.fromBytes(
+        Seq.fill(9)(0x00.toByte)
+      ))
+    }
+  }
+
+  it should "be constructed in big-endian order" in {
+    val dut = Block.fromBytes(
+      Seq(0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef).map(_.toByte)
+    )
+    for (i <- 0 until 16) {
+      dut.cells(i).value should be(i)
     }
   }
 

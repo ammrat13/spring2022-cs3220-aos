@@ -36,3 +36,11 @@ case class Block(val cells: Seq[Cell]) {
     this.cells(s(i))
   })
 }
+
+object Block {
+
+  /** Construct a block for a sequence of bytes */
+  def fromBytes(bytes: Seq[Byte]): Block = new Block(
+    bytes.map((b) => Seq(new Cell((b >> 4) & 0xf), new Cell(b & 0xf))).flatten
+  )
+}
