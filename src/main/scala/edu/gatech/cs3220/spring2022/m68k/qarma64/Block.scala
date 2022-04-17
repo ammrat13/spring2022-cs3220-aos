@@ -1,11 +1,14 @@
 package edu.gatech.cs3220.spring2022.m68k.qarma64
 
+import edu.gatech.cs3220.spring2022.m68k.qarma64.util.Permutation
+
 /** Represents a single block in Qarma
   *
   * Composed of exactly 16 cells. Also provides functions to permute, map, LFSR,
   * and mix the cells.
   *
-  * @param values
+  * @param cells
+  *   The cells of the block
   */
 case class Block(val cells: Seq[Cell]) {
 
@@ -27,4 +30,9 @@ case class Block(val cells: Seq[Cell]) {
       if (Seq(0, 1, 3, 4, 8, 11, 13) contains i) f(c) else c
     }
   )
+
+  /** Permute the cells */
+  def permute(s: Permutation): Block = new Block((0 until 16).map { i =>
+    this.cells(s(i))
+  })
 }
