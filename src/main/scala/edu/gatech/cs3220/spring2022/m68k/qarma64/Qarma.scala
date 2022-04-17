@@ -9,8 +9,8 @@ object Qarma {
     * See: https://eprint.iacr.org/2016/444.pdf Table 1
     */
   val REFLECTION_CONSTANT: Block =
-    Block(
-      Seq(0xc0, 0xac, 0x29, 0xb7, 0xc9, 0x7c, 0x50, 0xdd).map(Cell)
+    Block.fromBytes(
+      Seq(0xc0, 0xac, 0x29, 0xb7, 0xc9, 0x7c, 0x50, 0xdd).map(_.toByte)
     )
 
   /** Default values for round keys
@@ -18,29 +18,29 @@ object Qarma {
     * See: https://eprint.iacr.org/2016/444.pdf Table 1
     */
   val ROUND_KEYS: Seq[Block] = Seq(
-    Block(
-      Seq(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00).map(Cell)
+    Block.fromBytes(
+      Seq(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00).map(_.toByte)
     ),
-    Block(
-      Seq(0x13, 0x19, 0x8a, 0x2e, 0x03, 0x70, 0x73, 0x44).map(Cell)
+    Block.fromBytes(
+      Seq(0x13, 0x19, 0x8a, 0x2e, 0x03, 0x70, 0x73, 0x44).map(_.toByte)
     ),
-    Block(
-      Seq(0xa4, 0x09, 0x38, 0x22, 0x29, 0x9f, 0x31, 0xd0).map(Cell)
+    Block.fromBytes(
+      Seq(0xa4, 0x09, 0x38, 0x22, 0x29, 0x9f, 0x31, 0xd0).map(_.toByte)
     ),
-    Block(
-      Seq(0x08, 0x2e, 0xfa, 0x98, 0xec, 0x4e, 0x6c, 0x89).map(Cell)
+    Block.fromBytes(
+      Seq(0x08, 0x2e, 0xfa, 0x98, 0xec, 0x4e, 0x6c, 0x89).map(_.toByte)
     ),
-    Block(
-      Seq(0x45, 0x28, 0x21, 0xe6, 0x38, 0xd0, 0x13, 0x77).map(Cell)
+    Block.fromBytes(
+      Seq(0x45, 0x28, 0x21, 0xe6, 0x38, 0xd0, 0x13, 0x77).map(_.toByte)
     ),
-    Block(
-      Seq(0xbe, 0x54, 0x66, 0xcf, 0x34, 0xe9, 0x0c, 0x6c).map(Cell)
+    Block.fromBytes(
+      Seq(0xbe, 0x54, 0x66, 0xcf, 0x34, 0xe9, 0x0c, 0x6c).map(_.toByte)
     ),
-    Block(
-      Seq(0x3f, 0x84, 0xd5, 0xb5, 0xb5, 0x47, 0x09, 0x17).map(Cell)
+    Block.fromBytes(
+      Seq(0x3f, 0x84, 0xd5, 0xb5, 0xb5, 0x47, 0x09, 0x17).map(_.toByte)
     ),
-    Block(
-      Seq(0x92, 0x16, 0xd5, 0xd9, 0x89, 0x79, 0xfb, 0x1b).map(Cell)
+    Block.fromBytes(
+      Seq(0x92, 0x16, 0xd5, 0xd9, 0x89, 0x79, 0xfb, 0x1b).map(_.toByte)
     )
   )
 
@@ -97,7 +97,7 @@ object Qarma {
   * @param s
   *   The substitution box to use
   */
-class Qarma(
+case class Qarma(
     val rounds: Int,
     val k0: Block,
     val k1: Block,
@@ -111,16 +111,16 @@ class Qarma(
   // Ensure that the number of rounds is good
   if (this.rounds < 1)
     throw new IllegalArgumentException("Qarma64 must have at least one round")
-  if (this.rounds < this.c.length)
+  if (this.rounds > this.c.length)
     throw new IllegalArgumentException("Must provide all round constants")
 
   // Key functions
   private def h(b: Block): Block = b.permute(Qarma.TWEAK_UPDATE_PERMUTATION)
   private def w(b: Block): Block = b.mapSpecial(c => {
-    val b0 = c.value & 0x1
-    val b1 = c.value & 0x2
-    val b2 = c.value & 0x4
-    val b3 = c.value & 0x8
+    val b0 = (c.value & 0x1) >> 0
+    val b1 = (c.value & 0x2) >> 1
+    val b2 = (c.value & 0x4) >> 2
+    val b3 = (c.value & 0x8) >> 3
     val c0 = b1
     val c1 = b2
     val c2 = b3
@@ -130,10 +130,10 @@ class Qarma(
   private def hInv(b: Block): Block =
     b.permute(Qarma.TWEAK_UPDATE_PERMUTATION.inverse)
   private def wInv(b: Block): Block = b.mapSpecial(c => {
-    val c0 = c.value & 0x1
-    val c1 = c.value & 0x2
-    val c2 = c.value & 0x4
-    val c3 = c.value & 0x8
+    val c0 = (c.value & 0x1) >> 0
+    val c1 = (c.value & 0x2) >> 1
+    val c2 = (c.value & 0x4) >> 2
+    val c3 = (c.value & 0x8) >> 3
     val b0 = c0 ^ c3
     val b1 = c0
     val b2 = c1
@@ -192,9 +192,9 @@ class Qarma(
     var tweak = t
 
     // Forward rounds
-    for (i <- 0 until this.rounds) {
+    for (i <- 0 to this.rounds - 1) {
       // Tweakkey
-      val tk = this.k0 ^ this.c(i)
+      val tk = tweak ^ this.k0 ^ this.c(i)
       state = state ^ tk
       // State update
       if (i != 0) {
@@ -225,7 +225,7 @@ class Qarma(
     state = state ^ (tweak ^ this.w0)
 
     // Backward rounds
-    for (i <- this.rounds - 1 to 0) {
+    for (i <- this.rounds - 1 to 0 by -1) {
       // Tweak update
       tweak = this.wInv(tweak)
       tweak = this.hInv(tweak)
@@ -236,7 +236,7 @@ class Qarma(
         state = this.tInv(state)
       }
       // Tweakkey
-      val tk = this.k1 ^ this.c(i) ^ this.a
+      val tk = tweak ^ this.k0 ^ this.c(i) ^ this.a
       state = state ^ tk
     }
 
