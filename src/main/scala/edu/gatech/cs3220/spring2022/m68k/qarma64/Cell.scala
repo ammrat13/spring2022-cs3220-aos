@@ -41,4 +41,7 @@ case class Cell(val value: Int) {
     val rhs = this.value >> actAmt
     return Cell((lhs | rhs) & 0xf)
   }
+
+  /** Map */
+  def map(f: (Int) => Int): Cell = Cell(f(this.value))
 }
