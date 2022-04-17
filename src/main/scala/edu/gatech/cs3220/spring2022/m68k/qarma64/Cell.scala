@@ -7,7 +7,7 @@ package edu.gatech.cs3220.spring2022.m68k.qarma64
   * @param value
   *   The value of this cell
   */
-class Cell(val value: Int) {
+case class Cell(val value: Int) {
 
   // Validation on the value
   if (value < 0 || value > 15)
