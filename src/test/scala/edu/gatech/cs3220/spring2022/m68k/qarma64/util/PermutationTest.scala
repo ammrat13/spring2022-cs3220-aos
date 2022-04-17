@@ -3,6 +3,8 @@ package edu.gatech.cs3220.spring2022.m68k.qarma64.util
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+import scala.util.Random
+
 class PermutationTest extends AnyFlatSpec with Matchers {
 
   "A permutation" should "accept valid representations" in {
@@ -47,5 +49,14 @@ class PermutationTest extends AnyFlatSpec with Matchers {
     val dut = new Permutation(Seq.range(0, 16))
     an[IndexOutOfBoundsException] should be thrownBy (dut(16))
     an[IndexOutOfBoundsException] should be thrownBy (dut(-1))
+  }
+
+  "Inverting a permutation" should "give the correct inverse" in {
+    val rand = new Random(10131885)
+    val dut = new Permutation(rand.shuffle(Seq.range(0, 16)))
+    for (i <- 0 until 16) {
+      dut.inverse(dut(i)) should be(i)
+      dut(dut.inverse(i)) should be(i)
+    }
   }
 }
