@@ -25,7 +25,7 @@ case class Permutation(val repr: Seq[Int]) {
   def apply(i: Int): Int = this.repr(i)
 
   /** Get the inverse of a permutation */
-  lazy val inverse: Permutation = new Permutation((0 until 16).map { (i) =>
+  lazy val inverse: Permutation = Permutation((0 until 16).map { (i) =>
     this.repr.indexOf(i)
   })
 }

@@ -14,7 +14,7 @@ case class Cell(val value: Int) {
     throw new IllegalArgumentException("Cell's value must be four bits")
 
   /** Exclusive-or between cells */
-  def ^(that: Cell): Cell = new Cell(this.value ^ that.value)
+  def ^(that: Cell): Cell = Cell(this.value ^ that.value)
 
   /** Rotate-left */
   def <<<(amt: Int): Cell = {
@@ -26,7 +26,7 @@ case class Cell(val value: Int) {
     // Compute parts, truncate, and return
     val lhs = this.value << actAmt
     val rhs = this.value >> (4 - actAmt)
-    return new Cell((lhs | rhs) & 0xf)
+    return Cell((lhs | rhs) & 0xf)
   }
 
   /** Rotate-right */
@@ -39,6 +39,6 @@ case class Cell(val value: Int) {
     // Compute parts, truncate, and return
     val lhs = this.value << (4 - actAmt)
     val rhs = this.value >> actAmt
-    return new Cell((lhs | rhs) & 0xf)
+    return Cell((lhs | rhs) & 0xf)
   }
 }

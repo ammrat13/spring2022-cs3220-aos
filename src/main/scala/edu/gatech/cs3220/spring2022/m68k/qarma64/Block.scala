@@ -17,22 +17,22 @@ case class Block(val cells: Seq[Cell]) {
     throw new IllegalArgumentException("Blocks must have sixteen cells")
 
   /** XORs two blocks cell-wise */
-  def ^(that: Block): Block = new Block(
+  def ^(that: Block): Block = Block(
     this.cells.zip(that.cells).map { case (a, b) => a ^ b }
   )
 
   /** Maps a function over all cells */
-  def map(f: (Cell) => Cell): Block = new Block(this.cells.map(f))
+  def map(f: (Cell) => Cell): Block = Block(this.cells.map(f))
 
   /** Maps a function over only the hardcoded "special" cells */
-  def mapSpecial(f: (Cell) => Cell): Block = new Block(
+  def mapSpecial(f: (Cell) => Cell): Block = Block(
     this.cells.zipWithIndex.map { case (c: Cell, i: Int) =>
       if (Seq(0, 1, 3, 4, 8, 11, 13) contains i) f(c) else c
     }
   )
 
   /** Permute the cells */
-  def permute(s: Permutation): Block = new Block((0 until 16).map { i =>
+  def permute(s: Permutation): Block = Block((0 until 16).map { i =>
     this.cells(s(i))
   })
 }
@@ -40,7 +40,7 @@ case class Block(val cells: Seq[Cell]) {
 object Block {
 
   /** Construct a block for a sequence of bytes */
-  def fromBytes(bytes: Seq[Byte]): Block = new Block(
-    bytes.map((b) => Seq(new Cell((b >> 4) & 0xf), new Cell(b & 0xf))).flatten
+  def fromBytes(bytes: Seq[Byte]): Block = Block(
+    bytes.map((b) => Seq(Cell((b >> 4) & 0xf), Cell(b & 0xf))).flatten
   )
 }

@@ -9,8 +9,8 @@ object Qarma {
     * See: https://eprint.iacr.org/2016/444.pdf Table 1
     */
   val REFLECTION_CONSTANT: Block =
-    new Block(
-      Seq(0xc0, 0xac, 0x29, 0xb7, 0xc9, 0x7c, 0x50, 0xdd).map(new Cell(_))
+    Block(
+      Seq(0xc0, 0xac, 0x29, 0xb7, 0xc9, 0x7c, 0x50, 0xdd).map(Cell)
     )
 
   /** Default values for round keys
@@ -18,29 +18,29 @@ object Qarma {
     * See: https://eprint.iacr.org/2016/444.pdf Table 1
     */
   val ROUND_KEYS: Seq[Block] = Seq(
-    new Block(
-      Seq(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00).map(new Cell(_))
+    Block(
+      Seq(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00).map(Cell)
     ),
-    new Block(
-      Seq(0x13, 0x19, 0x8a, 0x2e, 0x03, 0x70, 0x73, 0x44).map(new Cell(_))
+    Block(
+      Seq(0x13, 0x19, 0x8a, 0x2e, 0x03, 0x70, 0x73, 0x44).map(Cell)
     ),
-    new Block(
-      Seq(0xa4, 0x09, 0x38, 0x22, 0x29, 0x9f, 0x31, 0xd0).map(new Cell(_))
+    Block(
+      Seq(0xa4, 0x09, 0x38, 0x22, 0x29, 0x9f, 0x31, 0xd0).map(Cell)
     ),
-    new Block(
-      Seq(0x08, 0x2e, 0xfa, 0x98, 0xec, 0x4e, 0x6c, 0x89).map(new Cell(_))
+    Block(
+      Seq(0x08, 0x2e, 0xfa, 0x98, 0xec, 0x4e, 0x6c, 0x89).map(Cell)
     ),
-    new Block(
-      Seq(0x45, 0x28, 0x21, 0xe6, 0x38, 0xd0, 0x13, 0x77).map(new Cell(_))
+    Block(
+      Seq(0x45, 0x28, 0x21, 0xe6, 0x38, 0xd0, 0x13, 0x77).map(Cell)
     ),
-    new Block(
-      Seq(0xbe, 0x54, 0x66, 0xcf, 0x34, 0xe9, 0x0c, 0x6c).map(new Cell(_))
+    Block(
+      Seq(0xbe, 0x54, 0x66, 0xcf, 0x34, 0xe9, 0x0c, 0x6c).map(Cell)
     ),
-    new Block(
-      Seq(0x3f, 0x84, 0xd5, 0xb5, 0xb5, 0x47, 0x09, 0x17).map(new Cell(_))
+    Block(
+      Seq(0x3f, 0x84, 0xd5, 0xb5, 0xb5, 0x47, 0x09, 0x17).map(Cell)
     ),
-    new Block(
-      Seq(0x92, 0x16, 0xd5, 0xd9, 0x89, 0x79, 0xfb, 0x1b).map(new Cell(_))
+    Block(
+      Seq(0x92, 0x16, 0xd5, 0xd9, 0x89, 0x79, 0xfb, 0x1b).map(Cell)
     )
   )
 
@@ -48,7 +48,7 @@ object Qarma {
     *
     * See https://eprint.iacr.org/2016/444.pdf Section 2.3
     */
-  val CELL_PERMUTATION: Permutation = new Permutation(
+  val CELL_PERMUTATION: Permutation = Permutation(
     Seq(0, 11, 6, 13, 10, 1, 12, 7, 5, 14, 3, 8, 15, 4, 9, 2)
   )
 
@@ -56,13 +56,13 @@ object Qarma {
     *
     * See https://eprint.iacr.org/2016/444.pdf Section 3.4
     */
-  val CELL_SBOX_0: Permutation = new Permutation(
+  val CELL_SBOX_0: Permutation = Permutation(
     Seq(0, 14, 2, 10, 9, 15, 8, 11, 6, 4, 3, 7, 13, 12, 1, 5)
   )
-  val CELL_SBOX_1: Permutation = new Permutation(
+  val CELL_SBOX_1: Permutation = Permutation(
     Seq(10, 13, 14, 6, 15, 7, 3, 5, 9, 8, 0, 12, 11, 1, 2, 4)
   )
-  val CELL_SBOX_2: Permutation = new Permutation(
+  val CELL_SBOX_2: Permutation = Permutation(
     Seq(11, 6, 8, 15, 12, 0, 9, 14, 3, 7, 4, 5, 13, 2, 1, 10)
   )
 
@@ -70,7 +70,7 @@ object Qarma {
     *
     * See https://eprint.iacr.org/2016/444.pdf Section 2.4
     */
-  val TWEAK_UPDATE_PERMUTATION: Permutation = new Permutation(
+  val TWEAK_UPDATE_PERMUTATION: Permutation = Permutation(
     Seq(6, 5, 14, 15, 0, 1, 2, 3, 7, 12, 13, 4, 8, 9, 10, 11)
   )
 }
