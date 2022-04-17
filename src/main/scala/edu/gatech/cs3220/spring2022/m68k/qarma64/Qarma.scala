@@ -52,6 +52,20 @@ object Qarma {
     Seq(0, 11, 6, 13, 10, 1, 12, 7, 5, 14, 3, 8, 15, 4, 9, 2)
   )
 
+  /** Substitution boxes used in the third phase of state update
+    *
+    * See https://eprint.iacr.org/2016/444.pdf Section 3.4
+    */
+  val CELL_SBOX_0: Permutation = new Permutation(
+    Seq(0, 14, 2, 10, 9, 15, 8, 11, 6, 4, 3, 7, 13, 12, 1, 5)
+  )
+  val CELL_SBOX_1: Permutation = new Permutation(
+    Seq(10, 13, 14, 6, 15, 7, 3, 5, 9, 8, 0, 12, 11, 1, 2, 4)
+  )
+  val CELL_SBOX_2: Permutation = new Permutation(
+    Seq(11, 6, 8, 15, 12, 0, 9, 14, 3, 7, 4, 5, 13, 2, 1, 10)
+  )
+
   /** Permutation used in the first phase of the tweak update
     *
     * See https://eprint.iacr.org/2016/444.pdf Section 2.4
@@ -80,6 +94,8 @@ object Qarma {
   *   The reflection constant
   * @param c
   *   The sequence of round keys
+  * @param s
+  *   The substitution box to use
   */
 class Qarma(
     val rounds: Int,
@@ -88,5 +104,6 @@ class Qarma(
     val w0: Seq[Byte],
     val w1: Seq[Byte],
     val a: Block = Qarma.REFLECTION_CONSTANT,
-    val c: Seq[Block] = Qarma.ROUND_KEYS
+    val c: Seq[Block] = Qarma.ROUND_KEYS,
+    val s: Permutation = Qarma.CELL_SBOX_1
 ) {}
