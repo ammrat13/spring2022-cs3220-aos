@@ -55,8 +55,8 @@ class PermutationTest extends AnyFlatSpec with Matchers {
     val rand = new Random(10131885)
     val dut = Permutation(rand.shuffle(Seq.range(0, 16)))
     for (i <- 0 until 16) {
-      dut.inverse(dut(i)) should be(i)
-      dut(dut.inverse(i)) should be(i)
+      dut.inv(dut(i)) should be(i)
+      dut(dut.inv(i)) should be(i)
     }
   }
 }

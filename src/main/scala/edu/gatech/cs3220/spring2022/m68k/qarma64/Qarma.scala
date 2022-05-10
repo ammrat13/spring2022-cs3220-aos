@@ -73,6 +73,35 @@ object Qarma {
   val TWEAK_UPDATE_PERMUTATION: Permutation = Permutation(
     Seq(6, 5, 14, 15, 0, 1, 2, 3, 7, 12, 13, 4, 8, 9, 10, 11)
   )
+
+  /** LFSR used in the second phase of tweak update
+    *
+    * See https://eprint.iacr.org/2016/444.pdf Section 2.4
+    */
+  val TWEAK_UPDATE_LFSR: (Cell) => Cell = { c =>
+    val b0 = (c.value & 0x1) >> 0
+    val b1 = (c.value & 0x2) >> 1
+    val b2 = (c.value & 0x4) >> 2
+    val b3 = (c.value & 0x8) >> 3
+    val c0 = b1
+    val c1 = b2
+    val c2 = b3
+    val c3 = b0 ^ b1
+    Cell((c3 << 3) | (c2 << 2) | (c1 << 1) | (c0 << 0))
+  }
+
+  /** Inverse of [TWEAK_UPDATE_LFSR] */
+  val TWEAK_UPDATE_LFSR_INV: (Cell) => Cell = { c =>
+    val c0 = (c.value & 0x1) >> 0
+    val c1 = (c.value & 0x2) >> 1
+    val c2 = (c.value & 0x4) >> 2
+    val c3 = (c.value & 0x8) >> 3
+    val b0 = c0 ^ c3
+    val b1 = c0
+    val b2 = c1
+    val b3 = c2
+    Cell((b3 << 3) | (b2 << 2) | (b1 << 1) | (b0 << 0))
+  }
 }
 
 /** Class describing a run of Qarma
@@ -114,33 +143,6 @@ case class Qarma(
   if (this.rounds > this.c.length)
     throw new IllegalArgumentException("Must provide all round constants")
 
-  // Key functions
-  private def h(b: Block): Block = b.permute(Qarma.TWEAK_UPDATE_PERMUTATION)
-  private def w(b: Block): Block = b.mapSpecial(c => {
-    val b0 = (c.value & 0x1) >> 0
-    val b1 = (c.value & 0x2) >> 1
-    val b2 = (c.value & 0x4) >> 2
-    val b3 = (c.value & 0x8) >> 3
-    val c0 = b1
-    val c1 = b2
-    val c2 = b3
-    val c3 = b0 ^ b1
-    Cell((c3 << 3) | (c2 << 2) | (c1 << 1) | (c0 << 0))
-  })
-  private def hInv(b: Block): Block =
-    b.permute(Qarma.TWEAK_UPDATE_PERMUTATION.inverse)
-  private def wInv(b: Block): Block = b.mapSpecial(c => {
-    val c0 = (c.value & 0x1) >> 0
-    val c1 = (c.value & 0x2) >> 1
-    val c2 = (c.value & 0x4) >> 2
-    val c3 = (c.value & 0x8) >> 3
-    val b0 = c0 ^ c3
-    val b1 = c0
-    val b2 = c1
-    val b3 = c2
-    Cell((b3 << 3) | (b2 << 2) | (b1 << 1) | (b0 << 0))
-  })
-
   // Matrix functions
   // M42 is involutory
   private def m42(b: Block): Block = Block(
@@ -164,13 +166,20 @@ case class Qarma(
     )
   )
 
+  // Tweak functions
+  private def w: (Block) => Block = _.mapSpecial(Qarma.TWEAK_UPDATE_LFSR)
+  private def h: (Block) => Block = _.permute(Qarma.TWEAK_UPDATE_PERMUTATION)
+  private def wInv: (Block) => Block = _.mapSpecial(Qarma.TWEAK_UPDATE_LFSR_INV)
+  private def hInv: (Block) => Block =
+    _.permute(Qarma.TWEAK_UPDATE_PERMUTATION.inv)
+
   // IS functions
   private def t: (Block) => Block = _.permute(Qarma.CELL_PERMUTATION)
   private def s: (Block) => Block = _.substitute(this.sBox)
   private def m: (Block) => Block = this.m42(_)
   private def q: (Block) => Block = this.m42(_)
-  private def tInv: (Block) => Block = _.permute(Qarma.CELL_PERMUTATION.inverse)
-  private def sInv: (Block) => Block = _.substitute(this.sBox.inverse)
+  private def tInv: (Block) => Block = _.permute(Qarma.CELL_PERMUTATION.inv)
+  private def sInv: (Block) => Block = _.substitute(this.sBox.inv)
   private def mInv: (Block) => Block = this.m42(_)
   private def qInv: (Block) => Block = this.m42(_)
 
