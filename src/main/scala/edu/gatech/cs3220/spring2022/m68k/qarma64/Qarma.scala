@@ -94,7 +94,7 @@ object Qarma {
   *   The reflection constant
   * @param c
   *   The sequence of round keys
-  * @param s
+  * @param sBox
   *   The substitution box to use
   */
 case class Qarma(
@@ -105,7 +105,7 @@ case class Qarma(
     val w1: Block,
     val a: Block = Qarma.REFLECTION_CONSTANT,
     val c: Seq[Block] = Qarma.ROUND_KEYS,
-    val s: Permutation = Qarma.CELL_SBOX_1
+    val sBox: Permutation = Qarma.CELL_SBOX_1
 ) {
 
   // Ensure that the number of rounds is good
@@ -165,14 +165,14 @@ case class Qarma(
   )
 
   // IS functions
-  private def t(b: Block): Block = b.permute(Qarma.CELL_PERMUTATION)
-  private def m(b: Block): Block = this.m42(b)
-  private def s(b: Block): Block = b.map(_.map(this.s.apply))
-  private def q(b: Block): Block = this.m42(b)
-  private def tInv(b: Block): Block = b.permute(Qarma.CELL_PERMUTATION.inverse)
-  private def mInv(b: Block): Block = this.m42(b)
-  private def sInv(b: Block): Block = b.map(_.map(this.s.inverse.apply))
-  private def qInv(b: Block): Block = this.m42(b)
+  private def t: (Block) => Block = _.permute(Qarma.CELL_PERMUTATION)
+  private def s: (Block) => Block = _.substitute(this.sBox)
+  private def m: (Block) => Block = this.m42(_)
+  private def q: (Block) => Block = this.m42(_)
+  private def tInv: (Block) => Block = _.permute(Qarma.CELL_PERMUTATION.inverse)
+  private def sInv: (Block) => Block = _.substitute(this.sBox.inverse)
+  private def mInv: (Block) => Block = this.m42(_)
+  private def qInv: (Block) => Block = this.m42(_)
 
   /** Encryption
     *

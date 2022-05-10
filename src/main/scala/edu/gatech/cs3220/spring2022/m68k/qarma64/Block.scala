@@ -21,8 +21,16 @@ case class Block(val cells: Seq[Cell]) {
     this.cells.zip(that.cells).map { case (a, b) => a ^ b }
   )
 
+  /** Permute the cells */
+  def permute(s: Permutation): Block = Block((0 until 16).map { i =>
+    this.cells(s(i))
+  })
+
+  /** Substitute the cells' values */
+  def substitute(s: Permutation): Block = this.map(_.map(s.apply))
+
   /** Maps a function over all cells */
-  def map(f: (Cell) => Cell): Block = Block(this.cells.map(f))
+  private def map(f: (Cell) => Cell): Block = Block(this.cells.map(f))
 
   /** Maps a function over only the hardcoded "special" cells */
   def mapSpecial(f: (Cell) => Cell): Block = Block(
@@ -30,11 +38,6 @@ case class Block(val cells: Seq[Cell]) {
       if (Seq(0, 1, 3, 4, 8, 11, 13) contains i) f(c) else c
     }
   )
-
-  /** Permute the cells */
-  def permute(s: Permutation): Block = Block((0 until 16).map { i =>
-    this.cells(s(i))
-  })
 }
 
 object Block {
