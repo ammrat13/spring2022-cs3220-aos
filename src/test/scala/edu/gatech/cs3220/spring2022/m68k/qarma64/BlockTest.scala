@@ -48,12 +48,6 @@ class BlockTest extends AnyFlatSpec with Matchers {
     }
   }
 
-  "Mapping over a block" should "apply the input function to all cells" in {
-    val dut = Block(Seq.fill(16)(Cell(0)))
-    val fun = (c: Cell) => Cell(1)
-    dut.map(fun).cells should equal(Seq.fill(16)(Cell(1)))
-  }
-
   "Mapping over the special cells in a block" should "apply the input function to only those cells" in {
     val dut = Block(Seq.fill(16)(Cell(0)))
     val fun = (c: Cell) => Cell(1)
@@ -90,6 +84,14 @@ class BlockTest extends AnyFlatSpec with Matchers {
     val s = Permutation(Seq.range(15, -1, -1))
     for (i <- 0 until 16) {
       dut.permute(s).cells(i).value should be(15 - i)
+    }
+  }
+
+  "Substituting a block" should "substitute each cell with the value from the permutation" in {
+    val dut = Block(Seq.range(0, 16).map(Cell(_)))
+    val s = Permutation(Seq.range(15, -1, -1))
+    for (i <- 0 until 16) {
+      dut.substitute(s).cells(i).value should be(15 - i)
     }
   }
 }

@@ -20,7 +20,7 @@ class QarmaTest extends AnyFlatSpec with Matchers {
       w1 = Block.fromBytes(
         Seq(0xc2, 0x5f, 0x42, 0xe7, 0x4c, 0x02, 0x74, 0xa4).map(_.toByte)
       ),
-      s = Qarma.CELL_SBOX_0
+      sBox = Qarma.CELL_SBOX_0
     )
 
     val exp = Block.fromBytes(
@@ -53,7 +53,7 @@ class QarmaTest extends AnyFlatSpec with Matchers {
       w1 = Block.fromBytes(
         Seq(0xc2, 0x5f, 0x42, 0xe7, 0x4c, 0x02, 0x74, 0xa4).map(_.toByte)
       ),
-      s = Qarma.CELL_SBOX_1
+      sBox = Qarma.CELL_SBOX_1
     )
 
     val exp = Block.fromBytes(
@@ -86,7 +86,7 @@ class QarmaTest extends AnyFlatSpec with Matchers {
       w1 = Block.fromBytes(
         Seq(0xc2, 0x5f, 0x42, 0xe7, 0x4c, 0x02, 0x74, 0xa4).map(_.toByte)
       ),
-      s = Qarma.CELL_SBOX_2
+      sBox = Qarma.CELL_SBOX_2
     )
 
     val exp = Block.fromBytes(
@@ -119,7 +119,7 @@ class QarmaTest extends AnyFlatSpec with Matchers {
       w1 = Block.fromBytes(
         Seq(0xc2, 0x5f, 0x42, 0xe7, 0x4c, 0x02, 0x74, 0xa4).map(_.toByte)
       ),
-      s = Qarma.CELL_SBOX_0
+      sBox = Qarma.CELL_SBOX_0
     )
 
     val exp = Block.fromBytes(
@@ -152,7 +152,7 @@ class QarmaTest extends AnyFlatSpec with Matchers {
       w1 = Block.fromBytes(
         Seq(0xc2, 0x5f, 0x42, 0xe7, 0x4c, 0x02, 0x74, 0xa4).map(_.toByte)
       ),
-      s = Qarma.CELL_SBOX_1
+      sBox = Qarma.CELL_SBOX_1
     )
 
     val exp = Block.fromBytes(
@@ -185,7 +185,7 @@ class QarmaTest extends AnyFlatSpec with Matchers {
       w1 = Block.fromBytes(
         Seq(0xc2, 0x5f, 0x42, 0xe7, 0x4c, 0x02, 0x74, 0xa4).map(_.toByte)
       ),
-      s = Qarma.CELL_SBOX_2
+      sBox = Qarma.CELL_SBOX_2
     )
 
     val exp = Block.fromBytes(
@@ -218,7 +218,7 @@ class QarmaTest extends AnyFlatSpec with Matchers {
       w1 = Block.fromBytes(
         Seq(0xc2, 0x5f, 0x42, 0xe7, 0x4c, 0x02, 0x74, 0xa4).map(_.toByte)
       ),
-      s = Qarma.CELL_SBOX_0
+      sBox = Qarma.CELL_SBOX_0
     )
 
     val exp = Block.fromBytes(
@@ -251,7 +251,7 @@ class QarmaTest extends AnyFlatSpec with Matchers {
       w1 = Block.fromBytes(
         Seq(0xc2, 0x5f, 0x42, 0xe7, 0x4c, 0x02, 0x74, 0xa4).map(_.toByte)
       ),
-      s = Qarma.CELL_SBOX_1
+      sBox = Qarma.CELL_SBOX_1
     )
 
     val exp = Block.fromBytes(
@@ -284,7 +284,7 @@ class QarmaTest extends AnyFlatSpec with Matchers {
       w1 = Block.fromBytes(
         Seq(0xc2, 0x5f, 0x42, 0xe7, 0x4c, 0x02, 0x74, 0xa4).map(_.toByte)
       ),
-      s = Qarma.CELL_SBOX_2
+      sBox = Qarma.CELL_SBOX_2
     )
 
     val exp = Block.fromBytes(
