@@ -3,7 +3,7 @@ package edu.gatech.cs3220.spring2022.m68k.qarma64.util
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import scala.util.Random
+import edu.gatech.cs3220.spring2022.m68k.qarma64.Qarma
 
 class PermutationTest extends AnyFlatSpec with Matchers {
 
@@ -51,12 +51,19 @@ class PermutationTest extends AnyFlatSpec with Matchers {
     an[IndexOutOfBoundsException] should be thrownBy (dut(-1))
   }
 
-  "Inverting a permutation" should "give the correct inverse" in {
-    val rand = new Random(10131885)
-    val dut = Permutation(rand.shuffle(Seq.range(0, 16)))
-    for (i <- 0 until 16) {
-      dut.inv(dut(i)) should be(i)
-      dut(dut.inv(i)) should be(i)
+  "Inverting the Qarma permutations" should "give the correct inverses" in {
+    val tests = Set(
+      Qarma.CELL_PERMUTATION,
+      Qarma.CELL_SBOX_0,
+      Qarma.CELL_SBOX_1,
+      Qarma.CELL_SBOX_2,
+      Qarma.TWEAK_UPDATE_PERMUTATION
+    )
+    for (dut <- tests) {
+      for (i <- 0 until 16) {
+        dut.inv(dut(i)) should be(i)
+        dut(dut.inv(i)) should be(i)
+      }
     }
   }
 }
