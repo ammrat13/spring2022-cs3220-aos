@@ -104,4 +104,44 @@ class CellTest extends AnyFlatSpec with Matchers {
       (dut <<< 0).value should equal(i)
     }
   }
+
+  "Multiplying two cells" should "have zero take everything to zero" in {
+    for (i <- 0 until 16) {
+      (Cell(i) mulR Cell(0)).value should equal(0)
+    }
+  }
+
+  it should "have one be the identity" in {
+    for (i <- 0 until 16) {
+      (Cell(i) mulR Cell(1)).value should equal(i)
+    }
+  }
+
+  it should "commute" in {
+    for (i <- 0 until 16) {
+      for (j <- 0 until 16) {
+        (Cell(i) mulR Cell(j)) should equal(Cell(j) mulR Cell(i))
+      }
+    }
+  }
+
+  it should "distribute over XOR" in {
+    for (i <- 0 until 16) {
+      for (j <- 0 until 16) {
+        for (k <- 0 until 16) {
+          (Cell(k) mulR (Cell(i) ^ Cell(j))) should equal(
+            (Cell(k) mulR Cell(i)) ^ (Cell(k) mulR Cell(j))
+          )
+        }
+      }
+    }
+  }
+
+  it should "have powers of two correspond to rotations" in {
+    for (i <- 0 until 4) {
+      for (j <- 0 until 16) {
+        (Cell(j) mulR Cell(1 << i)) should equal(Cell(j) <<< i)
+      }
+    }
+  }
 }
