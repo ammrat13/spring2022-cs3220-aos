@@ -48,13 +48,16 @@ case class Cell(val value: Int) {
   /** Multiplication over the ring R
     *
     * Cells in the internal state are sometimes treated as elements of the ring
-    * R_4 = F_2[x] / x^4 + 1. Here, x satisfies that x^4 == 1. Each of the four
+    * R_4 = F_2[x] / x^4 - 1. Here, x satisfies that x^4 == 1. Each of the four
     * bits are treated as a coefficient in front of a power of x, with bit 0
     * being the x^0 coefficient, bit 1 being x^1, and so on.
     *
     * Addition over that ring is just XOR. Multiplication is this operation.
     *
     * See https://eprint.iacr.org/2016/444.pdf Section 3.1.1
+    *
+    * @param that
+    *   The cell to multiply with this
     */
   def mulR(that: Cell): Cell = {
     // Extract all the bits of this

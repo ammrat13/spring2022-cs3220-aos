@@ -42,6 +42,35 @@ case class Block(val cells: Seq[Cell]) {
       if (Seq(0, 1, 3, 4, 8, 11, 13) contains i) f(c) else c
     }
   )
+
+  /** Multiply two blocks by treating them as matricies
+    *
+    * Sometimes, the internal state block is treated as a 4*4 matrix over the
+    * ring R_4 = F_2[x] / x^4 - 1. Here, x satisifies x^4 == 1. Matrix
+    * multiplication over this ring satisfies the usual rules for matrix
+    * multiplication, with element-wise multiplication being [Cell.mulR] and
+    * element-wise addition being XOR.
+    *
+    * The matrix's cells are stored in row major order. So, index 1 is the
+    * element at row 0 column 1. This matrix is multiplied on the left.
+    *
+    * See https://eprint.iacr.org/2016/444.pdf Section 2.1
+    *
+    * @param that
+    *   The matrix to multiply this with. That is multiplied on the right, and
+    *   this is on the left.
+    */
+  def mulMatR(that: Block): Block = Block(
+    (0 until 4).map { r =>
+      (0 until 4).map { c =>
+        (0 until 4)
+          .map { i =>
+            this.cells(4 * r + i) mulR that.cells(4 * i + c)
+          }
+          .fold(Cell(0))(_ ^ _)
+      }
+    }.flatten
+  )
 }
 
 object Block {
