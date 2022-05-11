@@ -4,6 +4,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 import edu.gatech.cs3220.spring2022.m68k.qarma64.util.Permutation
+import edu.gatech.cs3220.spring2022.m68k.qarma64.util.LFSR
 
 class BlockTest extends AnyFlatSpec with Matchers {
 
@@ -48,31 +49,6 @@ class BlockTest extends AnyFlatSpec with Matchers {
     }
   }
 
-  "Mapping over the special cells in a block" should "apply the input function to only those cells" in {
-    val dut = Block(Seq.fill(16)(Cell(0)))
-    val fun = (c: Cell) => Cell(1)
-    dut.mapSpecial(fun).cells should equal(
-      Seq(
-        Cell(1),
-        Cell(1),
-        Cell(0),
-        Cell(1),
-        Cell(1),
-        Cell(0),
-        Cell(0),
-        Cell(0),
-        Cell(1),
-        Cell(0),
-        Cell(0),
-        Cell(1),
-        Cell(0),
-        Cell(1),
-        Cell(0),
-        Cell(0)
-      )
-    )
-  }
-
   "XORing two blocks" should "give the same result as XORing the individual cells" in {
     val lhs = Block(Seq.fill(16)(Cell(0x5)))
     val rhs = Block(Seq.fill(16)(Cell(0xa)))
@@ -93,5 +69,30 @@ class BlockTest extends AnyFlatSpec with Matchers {
     for (i <- 0 until 16) {
       dut.substitute(s).cells(i).value should be(15 - i)
     }
+  }
+
+  "Shifting a block" should "apply the LFSR to the special cells" in {
+    val dut = Block(Seq.fill(16)(Cell(0x1)))
+    val l = LFSR(Set(0, 1))
+    dut.shift(l).cells should equal(
+      Seq(
+        Cell(0x8),
+        Cell(0x8),
+        Cell(0x1),
+        Cell(0x8),
+        Cell(0x8),
+        Cell(0x1),
+        Cell(0x1),
+        Cell(0x1),
+        Cell(0x8),
+        Cell(0x1),
+        Cell(0x1),
+        Cell(0x8),
+        Cell(0x1),
+        Cell(0x8),
+        Cell(0x1),
+        Cell(0x1)
+      )
+    )
   }
 }

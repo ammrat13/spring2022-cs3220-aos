@@ -1,6 +1,7 @@
 package edu.gatech.cs3220.spring2022.m68k.qarma64
 
 import edu.gatech.cs3220.spring2022.m68k.qarma64.util.Permutation
+import edu.gatech.cs3220.spring2022.m68k.qarma64.util.LFSR
 
 /** Represents a single block in Qarma
   *
@@ -32,8 +33,11 @@ case class Block(val cells: Seq[Cell]) {
   /** Maps a function over all cells */
   private def map(f: (Cell) => Cell): Block = Block(this.cells.map(f))
 
+  /** Applies an LFSR to the "special" cells */
+  def shift(l: LFSR): Block = this.mapSpecial(l.apply)
+
   /** Maps a function over only the hardcoded "special" cells */
-  def mapSpecial(f: (Cell) => Cell): Block = Block(
+  private def mapSpecial(f: (Cell) => Cell): Block = Block(
     this.cells.zipWithIndex.map { case (c: Cell, i: Int) =>
       if (Seq(0, 1, 3, 4, 8, 11, 13) contains i) f(c) else c
     }

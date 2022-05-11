@@ -145,10 +145,10 @@ case class Qarma(
   )
 
   // Tweak functions
-  private def w: (Block) => Block = _.mapSpecial(Qarma.TWEAK_UPDATE_LFSR.apply)
+  private def w: (Block) => Block = _.shift(Qarma.TWEAK_UPDATE_LFSR)
   private def h: (Block) => Block = _.permute(Qarma.TWEAK_UPDATE_PERMUTATION)
   private def wInv: (Block) => Block =
-    _.mapSpecial(Qarma.TWEAK_UPDATE_LFSR.inv.apply)
+    _.shift(Qarma.TWEAK_UPDATE_LFSR.inv)
   private def hInv: (Block) => Block =
     _.permute(Qarma.TWEAK_UPDATE_PERMUTATION.inv)
 
