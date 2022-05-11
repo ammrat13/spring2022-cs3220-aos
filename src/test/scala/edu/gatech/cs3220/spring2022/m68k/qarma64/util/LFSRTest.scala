@@ -14,9 +14,18 @@ class LFSRTest extends AnyFlatSpec with Matchers {
   }
 
   it should "reject representation with indicies out of range" in {
-    an[IllegalArgumentException] should be thrownBy (LFSR(Set(0, -1), LFSR.RIGHT))
-    an[IllegalArgumentException] should be thrownBy (LFSR(Set(0, 4), LFSR.RIGHT))
-    an[IllegalArgumentException] should be thrownBy (LFSR(Set(3, -1), LFSR.LEFT))
+    an[IllegalArgumentException] should be thrownBy (LFSR(
+      Set(0, -1),
+      LFSR.RIGHT
+    ))
+    an[IllegalArgumentException] should be thrownBy (LFSR(
+      Set(0, 4),
+      LFSR.RIGHT
+    ))
+    an[IllegalArgumentException] should be thrownBy (LFSR(
+      Set(3, -1),
+      LFSR.LEFT
+    ))
     an[IllegalArgumentException] should be thrownBy (LFSR(Set(3, 4), LFSR.LEFT))
   }
 
@@ -26,24 +35,24 @@ class LFSRTest extends AnyFlatSpec with Matchers {
   }
 
   "Applying an LFSR" should "shift right correctly" in {
-    val dut = LFSR(Set(0,2), LFSR.RIGHT)
-    dut(Cell(0x1)) should be (Cell(0x8))
-    dut(Cell(0x5)) should be (Cell(0x2))
-    dut(Cell(0x4)) should be (Cell(0xa))
+    val dut = LFSR(Set(0, 2), LFSR.RIGHT)
+    dut(Cell(0x1)) should be(Cell(0x8))
+    dut(Cell(0x5)) should be(Cell(0x2))
+    dut(Cell(0x4)) should be(Cell(0xa))
   }
 
   it should "shift left correctly" in {
-    val dut = LFSR(Set(3,2), LFSR.LEFT)
-    dut(Cell(0x9)) should be (Cell(0x3))
-    dut(Cell(0xd)) should be (Cell(0xa))
-    dut(Cell(0x2)) should be (Cell(0x4))
+    val dut = LFSR(Set(3, 2), LFSR.LEFT)
+    dut(Cell(0x9)) should be(Cell(0x3))
+    dut(Cell(0xd)) should be(Cell(0xa))
+    dut(Cell(0x2)) should be(Cell(0x4))
   }
 
   "Inverting the Qarma LFSR" should "give the correct inverse" in {
     val dut = Qarma.TWEAK_UPDATE_LFSR
-    for(i <- 0 until 16) {
-      dut.inv(dut(Cell(i))) should be (Cell(i))
-      dut(dut.inv(Cell(i))) should be (Cell(i))
+    for (i <- 0 until 16) {
+      dut.inv(dut(Cell(i))) should be(Cell(i))
+      dut(dut.inv(Cell(i))) should be(Cell(i))
     }
   }
 }
