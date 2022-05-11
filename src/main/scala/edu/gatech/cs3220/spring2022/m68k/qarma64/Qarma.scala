@@ -80,6 +80,21 @@ object Qarma {
     * See https://eprint.iacr.org/2016/444.pdf Section 2.4
     */
   val TWEAK_UPDATE_LFSR: LFSR = LFSR(Set(0, 1))
+
+  /** Matrix used in both the forward and reverse rounds
+    *
+    * It's involutory, so it can be used as its own inverse.
+    *
+    * See https://eprint.iacr.org/2016/444.pdf Section 3.2
+    */
+  val M42: Block = Block(
+    Seq(
+      Seq(0, 2, 4, 2),
+      Seq(2, 0, 2, 4),
+      Seq(4, 2, 0, 2),
+      Seq(2, 4, 2, 0)
+    ).flatten.map(Cell(_))
+  )
 }
 
 /** Class describing a run of Qarma
@@ -121,29 +136,6 @@ case class Qarma(
   if (this.rounds > this.c.length)
     throw new IllegalArgumentException("Must provide all round constants")
 
-  // Matrix functions
-  // M42 is involutory
-  private def m42(b: Block): Block = Block(
-    Seq(
-      (b.cells(4) <<< 1) ^ (b.cells(8) <<< 2) ^ (b.cells(12) <<< 1),
-      (b.cells(5) <<< 1) ^ (b.cells(9) <<< 2) ^ (b.cells(13) <<< 1),
-      (b.cells(6) <<< 1) ^ (b.cells(10) <<< 2) ^ (b.cells(14) <<< 1),
-      (b.cells(7) <<< 1) ^ (b.cells(11) <<< 2) ^ (b.cells(15) <<< 1),
-      (b.cells(0) <<< 1) ^ (b.cells(8) <<< 1) ^ (b.cells(12) <<< 2),
-      (b.cells(1) <<< 1) ^ (b.cells(9) <<< 1) ^ (b.cells(13) <<< 2),
-      (b.cells(2) <<< 1) ^ (b.cells(10) <<< 1) ^ (b.cells(14) <<< 2),
-      (b.cells(3) <<< 1) ^ (b.cells(11) <<< 1) ^ (b.cells(15) <<< 2),
-      (b.cells(0) <<< 2) ^ (b.cells(4) <<< 1) ^ (b.cells(12) <<< 1),
-      (b.cells(1) <<< 2) ^ (b.cells(5) <<< 1) ^ (b.cells(13) <<< 1),
-      (b.cells(2) <<< 2) ^ (b.cells(6) <<< 1) ^ (b.cells(14) <<< 1),
-      (b.cells(3) <<< 2) ^ (b.cells(7) <<< 1) ^ (b.cells(15) <<< 1),
-      (b.cells(0) <<< 1) ^ (b.cells(4) <<< 2) ^ (b.cells(8) <<< 1),
-      (b.cells(1) <<< 1) ^ (b.cells(5) <<< 2) ^ (b.cells(9) <<< 1),
-      (b.cells(2) <<< 1) ^ (b.cells(6) <<< 2) ^ (b.cells(10) <<< 1),
-      (b.cells(3) <<< 1) ^ (b.cells(7) <<< 2) ^ (b.cells(11) <<< 1)
-    )
-  )
-
   // Tweak functions
   private def w: (Block) => Block = _.shift(Qarma.TWEAK_UPDATE_LFSR)
   private def h: (Block) => Block = _.permute(Qarma.TWEAK_UPDATE_PERMUTATION)
@@ -155,12 +147,12 @@ case class Qarma(
   // IS functions
   private def t: (Block) => Block = _.permute(Qarma.CELL_PERMUTATION)
   private def s: (Block) => Block = _.substitute(this.sBox)
-  private def m: (Block) => Block = this.m42(_)
-  private def q: (Block) => Block = this.m42(_)
+  private def m: (Block) => Block = Qarma.M42.mulMatR
+  private def q: (Block) => Block = Qarma.M42.mulMatR
   private def tInv: (Block) => Block = _.permute(Qarma.CELL_PERMUTATION.inv)
   private def sInv: (Block) => Block = _.substitute(this.sBox.inv)
-  private def mInv: (Block) => Block = this.m42(_)
-  private def qInv: (Block) => Block = this.m42(_)
+  private def mInv: (Block) => Block = Qarma.M42.mulMatR
+  private def qInv: (Block) => Block = Qarma.M42.mulMatR
 
   /** Encryption
     *
