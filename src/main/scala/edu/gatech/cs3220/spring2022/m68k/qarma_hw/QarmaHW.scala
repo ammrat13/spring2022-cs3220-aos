@@ -23,6 +23,21 @@ class QarmaHWOutput extends Bundle {
   val tweak = UInt(64.W)
 }
 
+object QarmaHW {
+
+  /** Same as [Qarma.REFLECTION_CONSTANT], but as a `UInt` */
+  val REFLECTION_CONSTANT: UInt = "h_c0ac29b7c97c50dd".U(64.W)
+
+  /** Same as [Qarma.ROUND_KEYS], but as a `Seq[UInt]` */
+  val ROUND_KEYS: Seq[UInt] = Seq(
+    "h_0000000000000000".U(64.W),
+    "h_13198a2e03707344".U(64.W),
+    "h_a4093822299f31d0".U(64.W),
+    "h_082efa98ec4e6c89".U(64.W),
+    "h_452821e638d01377".U(64.W)
+  )
+}
+
 /** Hardware module for a run of Qarma
   *
   * It's designed to have four cycles of latency, implemented iteratively. Only
@@ -33,7 +48,10 @@ class QarmaHWOutput extends Bundle {
   * @param c
   *   The sequence of round keys
   */
-class QarmaHW(a: UInt, c: Seq[UInt]) extends Module {
+class QarmaHW(
+    a: UInt = QarmaHW.REFLECTION_CONSTANT,
+    c: Seq[UInt] = QarmaHW.ROUND_KEYS
+) extends Module {
 
   // Reflection constant must be a 64-bit integer
   require(
