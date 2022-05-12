@@ -1,4 +1,4 @@
-package edu.gatech.cs3220.spring2022.m68k.qarma_hw
+package edu.gatech.cs3220.spring2022.m68k.qarma64_hw
 
 import chisel3._
 import chisel3.util.Decoupled
