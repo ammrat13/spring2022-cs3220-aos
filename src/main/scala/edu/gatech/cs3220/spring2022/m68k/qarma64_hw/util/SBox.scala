@@ -25,9 +25,8 @@ class SBox(s: Permutation) {
   /** Substitute an entire block */
   def substitute(b: BlockHW): BlockHW = {
     val ret = Wire(new BlockHW)
-    for (i <- 0 to 3)
-      for (j <- 0 to 3)
-        ret.cells(i)(j) := this.substitute(b.cells(i)(j))
+    for (i <- 0 to 15)
+      ret.cells(i) := this.substitute(b.cells(i))
     return ret
   }
 }
