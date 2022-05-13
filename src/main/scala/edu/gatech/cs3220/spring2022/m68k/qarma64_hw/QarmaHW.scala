@@ -17,15 +17,11 @@ class QarmaHWInput extends Bundle {
   val tweak = UInt(64.W)
 }
 
-/** Bundle for the output ciphertext */
+/** Bundle for the output ciphertext, along with the input that produced it */
 class QarmaHWOutput extends Bundle {
+  val ptext = UInt(64.W)
+  val tweak = UInt(64.W)
   val ctext = UInt(64.W)
-}
-
-/** Intermediate stage of the computation */
-class QarmaHWIntermediate extends Bundle {
-  val text = new Block
-  val tweak = new Block
 }
 
 object QarmaHW {
@@ -69,27 +65,4 @@ class QarmaHW(
     this.c.forall(n => n.widthOption == Some(64)),
     "All round constants must be 64-bit unsigned integers"
   )
-
-  val io = IO(new Bundle {
-    val keys = Input(new QarmaHWKeys)
-    val inp = Flipped(Decoupled(new QarmaHWInput))
-    val out = Decoupled(new QarmaHWOutput)
-  })
-
-  val inter = Wire(new QarmaHWIntermediate)
-
-  val text2Block = Module(new UInt2Block)
-  text2Block.inp := io.inp.bits.ptext
-  inter.text := text2Block.out
-
-  val tweak2Block = Module(new UInt2Block)
-  tweak2Block.inp := io.inp.bits.tweak
-  inter.tweak := tweak2Block.out
-
-  val out2UInt = Module(new Block2UInt)
-  out2UInt.inp := inter.text
-  io.out.bits.ctext := out2UInt.out
-
-  io.inp.ready := true.B
-  io.out.valid := io.inp.valid
 }
