@@ -19,13 +19,13 @@ class CellHW extends Bundle {
   /** Rotate-left */
   def <<<(amt: Int): CellHW = {
     // Error checking
-    if(amt < 0)
+    if (amt < 0)
       return this >>> (-amt)
 
     // Get the actual amount
     val a = amt % 4
     // More error checking on the actual amount
-    if(a == 0)
+    if (a == 0)
       return this
 
     // Do the shift
@@ -37,13 +37,13 @@ class CellHW extends Bundle {
   /** Rotate-right */
   def >>>(amt: Int): CellHW = {
     // Error checking
-    if(amt < 0)
+    if (amt < 0)
       return this <<< (-amt)
 
     // Get the actual amount
     val a = amt % 4
     // More error checking on the actual amount
-    if(a == 0)
+    if (a == 0)
       return this
 
     // Do the shift

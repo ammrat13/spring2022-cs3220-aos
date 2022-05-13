@@ -68,4 +68,11 @@ class QarmaHW(
     this.c.forall(n => n.widthOption == Some(64)),
     "All round constants must be 64-bit unsigned integers"
   )
+
+  val io = IO(new Bundle {
+    val in = Input(new BlockHW)
+    val out = Output(new BlockHW)
+  })
+
+  io.out := (new SBox(Qarma.CELL_SBOX_0)).substitute(io.in)
 }
