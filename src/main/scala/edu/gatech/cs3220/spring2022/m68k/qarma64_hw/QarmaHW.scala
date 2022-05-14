@@ -8,6 +8,7 @@ import edu.gatech.cs3220.spring2022.m68k.qarma64.util.Permutation
 import edu.gatech.cs3220.spring2022.m68k.qarma64_hw.util.LFSRHW
 import edu.gatech.cs3220.spring2022.m68k.qarma64_hw.rounds.ForwardRound
 import edu.gatech.cs3220.spring2022.m68k.qarma64_hw.rounds.BackwardRound
+import edu.gatech.cs3220.spring2022.qarma64_hw.m68k.rounds.QarmaHWIntermediate
 
 /** Bundle for the keys */
 class QarmaHWKeys extends Bundle {
@@ -82,6 +83,7 @@ class QarmaHW(
 
   // Convert the parameters to blocks
   val k0_block = BlockHWInit(key.k0)
+  val k1_block = BlockHWInit(key.k1)
   val w0_block = BlockHWInit(key.w0)
   val w1_block = BlockHWInit(key.w1)
   val ptext_block = BlockHWInit(inp.bits.ptext)
@@ -89,36 +91,55 @@ class QarmaHW(
 
   // Create the forward rounds
   // Connect all the common pins
-  val forward_rounds = (0 to 4)
-    .map { i => Module(new ForwardRound(i == 0, this.c(i), this.sBox)) }
-  forward_rounds.zipWithIndex
-    .foreach { case (r, i) =>
-      r.io.k0 := k0_block
-    }
-  // Chain them all together
-  // Then seed the first
-  for (i <- 1 to 4) {
-    forward_rounds(i).io.inp <> forward_rounds(i - 1).io.out
+  val forward_rounds = (0 to 4).map { i =>
+    val r = Module(new ForwardRound(i == 0, this.c(i), this.sBox))
+    r.io.k0 := k0_block
+    r
   }
+  // Seed the first round, then chain the rest
   forward_rounds(0).io.inp.ptext := ptext_block
   forward_rounds(0).io.inp.ctext := ptext_block ^ w0_block
   forward_rounds(0).io.inp.otweak := tweak_block
   forward_rounds(0).io.inp.ntweak := tweak_block
+  for (i <- 1 to 4) {
+    forward_rounds(i).io.inp <> forward_rounds(i - 1).io.out
+  }
+
+  // Pseudo-reflector
+  // First, connect everything as normal
+  val psuedo_reflected = Wire(new QarmaHWIntermediate)
+  psuedo_reflected.ptext := forward_rounds(4).io.out.ptext
+  psuedo_reflected.otweak := forward_rounds(4).io.out.otweak
+  psuedo_reflected.ntweak := forward_rounds(4).io.out.ntweak
+  // Then do the math
+  psuedo_reflected.ctext := forward_rounds(4).io.out.ctext
+    .^(forward_rounds(4).io.out.ntweak)
+    .^(w1_block)
+    .permute(Qarma.CELL_PERMUTATION)
+    .mulMatR(Qarma.M42)
+    .substitute(this.sBox)
+    .permute(Qarma.CELL_PERMUTATION)
+    .mulMatR(Qarma.M42)
+    .^(k1_block)
+    .permute(Qarma.CELL_PERMUTATION.inv)
+    .substitute(this.sBox.inv)
+    .mulMatR(Qarma.M42)
+    .permute(Qarma.CELL_PERMUTATION.inv)
+    .^(forward_rounds(4).io.out.ntweak)
+    .^(w0_block)
 
   // The same as above, but for the backward rounds
   // They're kept in the array in reverse order. So Index 0 is the last backward
   // round to be performed.
   val backward_rounds = (0 to 4).map { i =>
-    Module(new BackwardRound(i == 0, this.a, this.c(i), this.sBox))
+    val r = Module(new BackwardRound(i == 0, this.a, this.c(i), this.sBox))
+    r.io.k0 := k0_block
+    r
   }
-  backward_rounds.zipWithIndex
-    .foreach { case (r, i) =>
-      r.io.k0 := k0_block
-    }
+  backward_rounds(4).io.inp <> psuedo_reflected
   for (i <- 0 to 3) {
     backward_rounds(i).io.inp <> backward_rounds(i + 1).io.out
   }
-  backward_rounds(4).io.inp <> forward_rounds(4).io.out
 
   inp.ready := true.B
   out.valid := inp.valid
