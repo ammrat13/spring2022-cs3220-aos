@@ -141,7 +141,7 @@ class QarmaHW(
     backward_rounds(i).io.inp <> backward_rounds(i + 1).io.out
   }
 
-  inp.ready := true.B
+  inp.ready := out.ready
   out.valid := inp.valid
   out.bits.ptext := inp.bits.ptext
   out.bits.tweak := inp.bits.tweak

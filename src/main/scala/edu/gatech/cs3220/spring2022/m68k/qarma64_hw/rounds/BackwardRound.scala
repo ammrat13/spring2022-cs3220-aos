@@ -27,6 +27,14 @@ class BackwardRound(
   io.out.ptext := io.inp.ptext
   io.out.otweak := io.inp.otweak
 
+  // Do wInv and hInv on the tweak
+  // We use this when computing the ciphertext
+  val out_ntweak = Wire(new BlockHW)
+  out_ntweak := io.inp.ntweak
+    .shift(Qarma.TWEAK_UPDATE_LFSR.inv)
+    .permute(Qarma.TWEAK_UPDATE_PERMUTATION.inv)
+  io.out.ntweak := out_ntweak
+
   // First, do sInv, then mInv and tInv (if not short)
   val ctext_after_scramble = Wire(new BlockHW)
   ctext_after_scramble := (if (!short) {
@@ -39,12 +47,9 @@ class BackwardRound(
                                .substitute(this.sBox.inv)
                            })
   // Then, add the round tweakkey
-  io.out.ctext := ctext_after_scramble ^ io.inp.ntweak ^ io.k0 ^ BlockHWInit(
-    this.a
-  ) ^ BlockHWInit(this.c)
-
-  // Do wInv and hInv on the tweak
-  io.out.ntweak := io.inp.ntweak
-    .shift(Qarma.TWEAK_UPDATE_LFSR.inv)
-    .permute(Qarma.TWEAK_UPDATE_PERMUTATION.inv)
+  io.out.ctext := ctext_after_scramble
+    .^(out_ntweak)
+    .^(io.k0)
+    .^(BlockHWInit(this.a))
+    .^(BlockHWInit(this.c))
 }
