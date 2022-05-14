@@ -3,6 +3,8 @@ package edu.gatech.cs3220.spring2022.m68k.qarma64_hw
 import chisel3._
 import chisel3.util.Cat
 
+import edu.gatech.cs3220.spring2022.m68k.qarma64.util.Permutation
+
 /** Wrapper class around a 4-bit value */
 class CellHW extends Bundle {
 
@@ -49,6 +51,16 @@ class CellHW extends Bundle {
     // Do the shift
     val ret = Wire(new CellHW)
     ret.bits := Cat((3 to 0 by -1).map { i => this.bits((i + a) % 4) })
+    return ret
+  }
+
+  /** Substitute */
+  def substitute(s: Permutation): CellHW = {
+    // Create the LUT for the permutation
+    val lut = VecInit(s.repr.map { _.U })
+    // Do the substitution
+    val ret = Wire(new CellHW)
+    ret.bits := lut(this.bits)
     return ret
   }
 }
