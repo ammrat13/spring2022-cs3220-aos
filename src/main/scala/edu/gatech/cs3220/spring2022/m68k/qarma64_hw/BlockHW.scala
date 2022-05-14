@@ -1,6 +1,7 @@
 package edu.gatech.cs3220.spring2022.m68k.qarma64_hw
 
 import chisel3._
+import chisel3.util.Cat
 
 import edu.gatech.cs3220.spring2022.m68k.qarma64.Block
 import edu.gatech.cs3220.spring2022.m68k.qarma64.util.Permutation
@@ -11,6 +12,13 @@ class BlockHW extends Bundle {
 
   /** The cells laid out in row-major order */
   val cells = Vec(16, new CellHW)
+
+  /** Convert back */
+  def intoUInt(): UInt = {
+    val ret = Wire(UInt(64.W))
+    ret := Cat(this.cells.map(_.bits))
+    return ret
+  }
 
   /** Exclusive-or two blocks cell-wise */
   def ^(that: BlockHW): BlockHW = {
@@ -83,6 +91,21 @@ class BlockHW extends Bundle {
       }
     }
 
+    return ret
+  }
+}
+
+object BlockHWInit {
+
+  /** Initialize a [BlockHW] from a literal */
+  def apply(lit: UInt): BlockHW = {
+    // Check that the literal is 64 bits
+    require(lit.widthOption == Some(64), "Block literal must be 64 bits")
+    // Create it new
+    val ret = Wire(new BlockHW)
+    ret.cells := VecInit((15 to 0 by -1).map { i =>
+      CellHWInit(lit(4 * i + 3, 4 * i))
+    })
     return ret
   }
 }
