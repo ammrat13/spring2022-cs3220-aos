@@ -7,6 +7,7 @@ import edu.gatech.cs3220.spring2022.m68k.qarma64.Qarma
 import edu.gatech.cs3220.spring2022.m68k.qarma64.util.Permutation
 import edu.gatech.cs3220.spring2022.m68k.qarma64_hw.util.LFSRHW
 import edu.gatech.cs3220.spring2022.m68k.qarma64_hw.rounds.ForwardRound
+import edu.gatech.cs3220.spring2022.m68k.qarma64_hw.rounds.BackwardRound
 
 /** Bundle for the keys */
 class QarmaHWKeys extends Bundle {
@@ -80,8 +81,6 @@ class QarmaHW(
   val key = IO(Input(new QarmaHWKeys))
 
   // Convert the parameters to blocks
-  val a_block = BlockHWInit(this.a)
-  val c_block = this.c.map(BlockHWInit.apply)
   val k0_block = BlockHWInit(key.k0)
   val w0_block = BlockHWInit(key.w0)
   val w1_block = BlockHWInit(key.w1)
@@ -91,11 +90,10 @@ class QarmaHW(
   // Create the forward rounds
   // Connect all the common pins
   val forward_rounds = (0 to 4)
-    .map { i => Module(new ForwardRound(i == 0, this.sBox)) }
+    .map { i => Module(new ForwardRound(i == 0, this.c(i), this.sBox)) }
   forward_rounds.zipWithIndex
     .foreach { case (r, i) =>
       r.io.k0 := k0_block
-      r.io.c := c_block(i)
     }
   // Chain them all together
   // Then seed the first
@@ -107,9 +105,24 @@ class QarmaHW(
   forward_rounds(0).io.inp.otweak := tweak_block
   forward_rounds(0).io.inp.ntweak := tweak_block
 
+  // The same as above, but for the backward rounds
+  // They're kept in the array in reverse order. So Index 0 is the last backward
+  // round to be performed.
+  val backward_rounds = (0 to 4).map { i =>
+    Module(new BackwardRound(i == 0, this.a, this.c(i), this.sBox))
+  }
+  backward_rounds.zipWithIndex
+    .foreach { case (r, i) =>
+      r.io.k0 := k0_block
+    }
+  for (i <- 0 to 3) {
+    backward_rounds(i).io.inp <> backward_rounds(i + 1).io.out
+  }
+  backward_rounds(4).io.inp <> forward_rounds(4).io.out
+
   inp.ready := true.B
   out.valid := inp.valid
   out.bits.ptext := inp.bits.ptext
   out.bits.tweak := inp.bits.tweak
-  out.bits.ctext := (forward_rounds(4).io.out.ctext ^ w1_block).intoUInt()
+  out.bits.ctext := (backward_rounds(0).io.out.ctext ^ w1_block).intoUInt()
 }

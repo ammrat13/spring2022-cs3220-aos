@@ -5,17 +5,21 @@ import chisel3._
 import edu.gatech.cs3220.spring2022.m68k.qarma64.Qarma
 import edu.gatech.cs3220.spring2022.m68k.qarma64.util.Permutation
 import edu.gatech.cs3220.spring2022.m68k.qarma64_hw.BlockHW
+import edu.gatech.cs3220.spring2022.m68k.qarma64_hw.BlockHWInit
 import edu.gatech.cs3220.spring2022.qarma64_hw.m68k.rounds.QarmaHWIntermediate
 
 /** A module that performs a forward round */
-class ForwardRound(val short: Boolean, val sBox: Permutation) extends Module {
+class ForwardRound(
+    val short: Boolean,
+    val c: UInt,
+    val sBox: Permutation
+) extends Module {
 
   val io = IO(new Bundle {
     val inp = Input(new QarmaHWIntermediate)
     val out = Output(new QarmaHWIntermediate)
 
     val k0 = Input(new BlockHW)
-    val c = Input(new BlockHW)
   })
 
   // Pass the originals through
@@ -24,7 +28,7 @@ class ForwardRound(val short: Boolean, val sBox: Permutation) extends Module {
 
   // First, add the round tweakkey
   val ctext_after_tk = Wire(new BlockHW)
-  ctext_after_tk := io.inp.ctext ^ io.inp.ntweak ^ io.k0 ^ io.c
+  ctext_after_tk := io.inp.ctext ^ io.inp.ntweak ^ io.k0 ^ BlockHWInit(this.c)
   // Then do t and m (if not short), then s
   io.out.ctext := (if (!short) {
                      ctext_after_tk
