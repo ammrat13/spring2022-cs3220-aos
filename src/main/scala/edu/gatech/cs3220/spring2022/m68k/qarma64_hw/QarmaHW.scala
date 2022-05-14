@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.util.Decoupled
 
 import edu.gatech.cs3220.spring2022.m68k.qarma64.Qarma
-import edu.gatech.cs3220.spring2022.m68k.qarma64_hw.util.SBox
+import edu.gatech.cs3220.spring2022.m68k.qarma64_hw.util.LFSRHW
 
 /** Bundle for the keys */
 class QarmaHWKeys extends Bundle {

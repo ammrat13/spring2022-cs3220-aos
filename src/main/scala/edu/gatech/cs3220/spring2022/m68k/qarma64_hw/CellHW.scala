@@ -4,6 +4,8 @@ import chisel3._
 import chisel3.util.Cat
 
 import edu.gatech.cs3220.spring2022.m68k.qarma64.util.Permutation
+import edu.gatech.cs3220.spring2022.m68k.qarma64.util.LFSR
+import edu.gatech.cs3220.spring2022.m68k.qarma64_hw.util.LFSRHW
 
 /** Wrapper class around a 4-bit value */
 class CellHW extends Bundle {
@@ -63,4 +65,7 @@ class CellHW extends Bundle {
     ret.bits := lut(this.bits)
     return ret
   }
+
+  /** Shift with an LFSR */
+  def shift(l: LFSR): CellHW = new LFSRHW(l).shift(this)
 }
