@@ -21,5 +21,9 @@ jobs:
       with:
         java-version: '11'
         distribution: 'temurin'
+    - name: Run lints
+      run: |
+        sbt scalafmtCheckAll
+        sbt scalafmtSbtCheck
     - name: Run tests
       run: sbt test
