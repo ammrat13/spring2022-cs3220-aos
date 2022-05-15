@@ -71,6 +71,11 @@ case class Block(val cells: Seq[Cell]) {
       }
     }.flatten
   )
+
+  /** Convert this Block to a `BigInt` */
+  def toBigInt: BigInt = this.cells.reverse.zipWithIndex.map { case (c, i) =>
+    BigInt(c.value) << (4 * i)
+  }.sum
 }
 
 object Block {

@@ -1,11 +1,13 @@
 package edu.gatech.cs3220.spring2022.m68k.qarma64_hw
 
+import scala.util.Random
 import chisel3._
 import chiseltest._
 import chisel3.experimental.BundleLiterals._
 import org.scalatest.flatspec.AnyFlatSpec
 
 import edu.gatech.cs3220.spring2022.m68k.qarma64.Qarma
+import edu.gatech.cs3220.spring2022.m68k.qarma64.Block
 
 class QarmaHWTest extends AnyFlatSpec with ChiselScalatestTester {
   behavior of "QarmaHW"
@@ -105,6 +107,58 @@ class QarmaHWTest extends AnyFlatSpec with ChiselScalatestTester {
             _.ctext -> "h_c003b93999b33765".U(64.W)
           )
         )
+      )
+    }
+  }
+
+  it should "handle different values being presented to it" in {
+    // Generate the test vectors randomly
+    val rng = new Random(314159)
+    val test_vecs =
+      Seq.fill(20)(BigInt(64, rng)) zip Seq.fill(20)(BigInt(64, rng))
+
+    // All the hard-coded values
+    val k0 = BigInt("ec2802d4e0a488e9", 16)
+    val k1 = BigInt("ec2802d4e0a488e9", 16)
+    val w0 = BigInt("84be85ce9804e94b", 16)
+    val w1 = BigInt("c25f42e74c0274a4", 16)
+
+    // Make the DUT and the reference
+    val ref = Qarma(
+      rounds = 5,
+      k0 = Block.fromBigInt(k0),
+      k1 = Block.fromBigInt(k1),
+      w0 = Block.fromBigInt(w0),
+      w1 = Block.fromBigInt(w1)
+    )
+    test(new QarmaHW) { c =>
+      c.key.k0.poke(k0.U(64.W))
+      c.key.k1.poke(k1.U(64.W))
+      c.key.w0.poke(w0.U(64.W))
+      c.key.w1.poke(w1.U(64.W))
+
+      // Initialize the channels
+      c.inp.initSource().setSourceClock(c.clock)
+      c.out.initSink().setSinkClock(c.clock)
+
+      parallel(
+        // Try encrypt
+        c.inp.enqueueSeq(test_vecs.map { case (p, t) =>
+          chiselTypeOf(c.inp.bits).Lit(
+            _.ptext -> p.U(64.W),
+            _.tweak -> t.U(64.W)
+          )
+        }),
+
+        // Check for the expected output
+        c.out.expectDequeueSeq(test_vecs.map { case (p, t) =>
+          chiselTypeOf(c.out.bits).Lit(
+            _.ptext -> p.U(64.W),
+            _.tweak -> t.U(64.W),
+            _.ctext -> ref(Block.fromBigInt(p), Block.fromBigInt(t)).toBigInt
+              .U(64.W)
+          )
+        })
       )
     }
   }
