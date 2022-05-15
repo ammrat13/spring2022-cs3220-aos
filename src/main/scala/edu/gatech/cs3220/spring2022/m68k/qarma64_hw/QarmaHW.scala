@@ -1,7 +1,9 @@
 package edu.gatech.cs3220.spring2022.m68k.qarma64_hw
 
 import chisel3._
+import chisel3.experimental.BundleLiterals._
 import chisel3.util.Decoupled
+import chisel3.util.Valid
 
 import edu.gatech.cs3220.spring2022.m68k.qarma64.Qarma
 import edu.gatech.cs3220.spring2022.m68k.qarma64.util.Permutation
@@ -89,6 +91,12 @@ class QarmaHW(
   val ptext_block = BlockHWInit(inp.bits.ptext)
   val tweak_block = BlockHWInit(inp.bits.tweak)
 
+  // Registers holding intermediate values
+  // Arranged in a pipeline
+  val regs = RegInit(
+    VecInit(Seq.fill(4)(Valid(new QarmaHWIntermediate).Lit(_.valid -> false.B)))
+  )
+
   // Create the forward rounds
   // Connect all the common pins
   val forward_rounds = (0 to 4).map { i =>
@@ -97,13 +105,12 @@ class QarmaHW(
     r
   }
   // Seed the first round, then chain the rest
-  forward_rounds(0).io.inp.ptext := ptext_block
-  forward_rounds(0).io.inp.ctext := ptext_block ^ w0_block
-  forward_rounds(0).io.inp.otweak := tweak_block
-  forward_rounds(0).io.inp.ntweak := tweak_block
-  for (i <- 1 to 4) {
-    forward_rounds(i).io.inp <> forward_rounds(i - 1).io.out
-  }
+  // Have to add registers in the middle
+  forward_rounds(0).io.inp <> regs(0).bits
+  forward_rounds(1).io.inp <> forward_rounds(0).io.out
+  forward_rounds(2).io.inp <> forward_rounds(1).io.out
+  forward_rounds(3).io.inp <> forward_rounds(2).io.out
+  forward_rounds(4).io.inp <> regs(1).bits
 
   // Pseudo-reflector
   // First, connect everything as normal
@@ -137,13 +144,40 @@ class QarmaHW(
     r
   }
   backward_rounds(4).io.inp <> psuedo_reflected
-  for (i <- 0 to 3) {
-    backward_rounds(i).io.inp <> backward_rounds(i + 1).io.out
-  }
+  backward_rounds(3).io.inp <> regs(2).bits
+  backward_rounds(2).io.inp <> backward_rounds(3).io.out
+  backward_rounds(1).io.inp <> backward_rounds(2).io.out
+  backward_rounds(0).io.inp <> backward_rounds(1).io.out
 
-  inp.ready := out.ready
-  out.valid := inp.valid
-  out.bits.ptext := inp.bits.ptext
-  out.bits.tweak := inp.bits.tweak
-  out.bits.ctext := (backward_rounds(0).io.out.ctext ^ w1_block).intoUInt()
+  // Register ready logic
+  // A register is ready to accept data if its data is invalid or the next stage
+  // is ready
+  val regs_ready = Wire(Vec(4, Bool()))
+  for (i <- 0 to 3)
+    regs_ready(i) := !regs(i).valid || (if (i == 3) out.ready
+                                        else regs_ready(i + 1))
+  // Registers latch whenever they are ready
+  // It's fine if the data isn't valid. It'll just be passed on
+  when(regs_ready(0)) {
+    regs(0).bits.ptext := ptext_block
+    regs(0).bits.ctext := ptext_block ^ w0_block
+    regs(0).bits.otweak := tweak_block
+    regs(0).bits.ntweak := tweak_block
+  }
+  when(regs_ready(1)) { regs(1).bits := forward_rounds(3).io.out }
+  when(regs_ready(2)) { regs(2).bits := backward_rounds(4).io.out }
+  when(regs_ready(3)) { regs(3).bits := backward_rounds(0).io.out }
+  // Now we handle the valids
+  for (i <- 0 to 3)
+    when(regs_ready(i)) {
+      regs(i).valid := (if (i == 0) inp.valid else regs(i - 1).valid)
+    }
+
+  // Output is just an interface to the last register in the pipeline
+  // Keys never change, so we can use them directly
+  inp.ready := regs_ready(0)
+  out.valid := regs(3).valid
+  out.bits.ptext := regs(3).bits.ptext.intoUInt()
+  out.bits.tweak := regs(3).bits.otweak.intoUInt()
+  out.bits.ctext := (regs(3).bits.ctext ^ w1_block).intoUInt()
 }
