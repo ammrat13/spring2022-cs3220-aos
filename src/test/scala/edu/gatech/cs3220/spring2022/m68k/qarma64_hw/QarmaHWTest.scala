@@ -1,6 +1,7 @@
 package edu.gatech.cs3220.spring2022.m68k.qarma64_hw
 
 import scala.util.Random
+import scala.util.control.Breaks._
 import chisel3._
 import chiseltest._
 import chisel3.experimental.BundleLiterals._
@@ -160,6 +161,51 @@ class QarmaHWTest extends AnyFlatSpec with ChiselScalatestTester {
           )
         })
       )
+    }
+  }
+
+  it should "have a latency of at most four cycles" in {
+    test(new QarmaHW) { c =>
+      // Give everything random values
+      // We don't so much care about what they are as much as when they appear
+      c.key.k0.poke(0.U(64.W))
+      c.key.k1.poke(0.U(64.W))
+      c.key.w0.poke(0.U(64.W))
+      c.key.w1.poke(0.U(64.W))
+
+      // Wait for ready
+      c.out.ready.poke(true.B)
+      fork
+        .withRegion(Monitor) {
+          while (c.inp.ready.peek().litToBoolean == false)
+            c.clock.step(1)
+        }
+        .joinAndStep(c.clock)
+
+      // Send the data
+      c.inp.valid.poke(true.B)
+      c.inp.bits.poke(
+        chiselTypeOf(c.inp.bits).Lit(
+          _.ptext -> "h_aaaaaaaaaaaaaaaa".U(64.W),
+          _.tweak -> "h_5555555555555555".U(64.W)
+        )
+      )
+
+      // Wait at most four cycles
+      // All the while, test if correct
+      // Remember to invalidate the input after the first cycle
+      breakable {
+        for (i <- 0 to 4) {
+          if (c.out.valid.peek().litToBoolean == true) {
+            c.out.bits.ptext.expect("h_aaaaaaaaaaaaaaaa".U(64.W))
+            c.out.bits.tweak.expect("h_5555555555555555".U(64.W))
+            break()
+          }
+          c.clock.step(1)
+          c.inp.valid.poke(false.B)
+        }
+        fail("Took too many cycles")
+      }
     }
   }
 }
