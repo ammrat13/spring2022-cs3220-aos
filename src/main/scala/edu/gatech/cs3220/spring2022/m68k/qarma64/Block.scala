@@ -71,12 +71,28 @@ case class Block(val cells: Seq[Cell]) {
       }
     }.flatten
   )
+
+  /** Convert this Block to a `BigInt` */
+  def toBigInt: BigInt = this.cells.reverse.zipWithIndex.map { case (c, i) =>
+    BigInt(c.value) << (4 * i)
+  }.sum
 }
 
 object Block {
 
   /** Construct a block for a sequence of bytes */
   def fromBytes(bytes: Seq[Byte]): Block = Block(
-    bytes.map((b) => Seq(Cell((b >> 4) & 0xf), Cell(b & 0xf))).flatten
+    bytes.map { b => Seq(Cell((b >> 4) & 0xf), Cell(b & 0xf)) }.flatten
   )
+
+  /** Construct a block from a `BigInt` */
+  def fromBigInt(n: BigInt): Block = {
+    // Do error checking here, because we don't catch it later
+    if (n > BigInt("ffffffffffffffff", 16))
+      throw new IllegalArgumentException("Blocks must be less than 2^64")
+    // Otherwise, we're good
+    return Block(
+      (15 to 0 by -1).map { i => Cell(((n >> (4 * i)) & 0xf).toInt) }
+    )
+  }
 }

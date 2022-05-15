@@ -40,10 +40,30 @@ class BlockTest extends AnyFlatSpec with Matchers {
     }
   }
 
-  it should "be constructed in big-endian order" in {
+  it should "be constructable from a BigInt" in {
+    withClue("Can't take in a small BigInt.") {
+      noException should be thrownBy (Block.fromBigInt(
+        BigInt("0000000000000000", 16)
+      ))
+    }
+    withClue("Can take in numbers larger than the limit") {
+      an[IllegalArgumentException] should be thrownBy (Block.fromBigInt(
+        BigInt("10000000000000000", 16)
+      ))
+    }
+  }
+
+  it should "be constructed in big-endian order with bytes" in {
     val dut = Block.fromBytes(
       Seq(0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef).map(_.toByte)
     )
+    for (i <- 0 until 16) {
+      dut.cells(i).value should be(i)
+    }
+  }
+
+  it should "be constructed in big-endian order with BigInts" in {
+    val dut = Block.fromBigInt(BigInt("0123456789abcdef", 16))
     for (i <- 0 until 16) {
       dut.cells(i).value should be(i)
     }

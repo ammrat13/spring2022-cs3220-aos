@@ -10,39 +10,21 @@ object Qarma {
     * See: https://eprint.iacr.org/2016/444.pdf Table 1
     */
   val REFLECTION_CONSTANT: Block =
-    Block.fromBytes(
-      Seq(0xc0, 0xac, 0x29, 0xb7, 0xc9, 0x7c, 0x50, 0xdd).map(_.toByte)
-    )
+    Block.fromBigInt(BigInt("c0ac29b7c97c50dd", 16))
 
   /** Default values for round keys
     *
     * See: https://eprint.iacr.org/2016/444.pdf Table 1
     */
   val ROUND_KEYS: Seq[Block] = Seq(
-    Block.fromBytes(
-      Seq(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00).map(_.toByte)
-    ),
-    Block.fromBytes(
-      Seq(0x13, 0x19, 0x8a, 0x2e, 0x03, 0x70, 0x73, 0x44).map(_.toByte)
-    ),
-    Block.fromBytes(
-      Seq(0xa4, 0x09, 0x38, 0x22, 0x29, 0x9f, 0x31, 0xd0).map(_.toByte)
-    ),
-    Block.fromBytes(
-      Seq(0x08, 0x2e, 0xfa, 0x98, 0xec, 0x4e, 0x6c, 0x89).map(_.toByte)
-    ),
-    Block.fromBytes(
-      Seq(0x45, 0x28, 0x21, 0xe6, 0x38, 0xd0, 0x13, 0x77).map(_.toByte)
-    ),
-    Block.fromBytes(
-      Seq(0xbe, 0x54, 0x66, 0xcf, 0x34, 0xe9, 0x0c, 0x6c).map(_.toByte)
-    ),
-    Block.fromBytes(
-      Seq(0x3f, 0x84, 0xd5, 0xb5, 0xb5, 0x47, 0x09, 0x17).map(_.toByte)
-    ),
-    Block.fromBytes(
-      Seq(0x92, 0x16, 0xd5, 0xd9, 0x89, 0x79, 0xfb, 0x1b).map(_.toByte)
-    )
+    Block.fromBigInt(BigInt("0000000000000000", 16)),
+    Block.fromBigInt(BigInt("13198a2e03707344", 16)),
+    Block.fromBigInt(BigInt("a4093822299f31d0", 16)),
+    Block.fromBigInt(BigInt("082efa98ec4e6c89", 16)),
+    Block.fromBigInt(BigInt("452821e638d01377", 16)),
+    Block.fromBigInt(BigInt("be5466cf34e90c6c", 16)),
+    Block.fromBigInt(BigInt("3f84d5b5b5470917", 16)),
+    Block.fromBigInt(BigInt("9216d5d98979fb1b", 16))
   )
 
   /** Permutation used in the first phase of the state update
