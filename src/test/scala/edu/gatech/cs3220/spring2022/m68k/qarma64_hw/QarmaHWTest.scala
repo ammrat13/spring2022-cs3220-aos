@@ -164,6 +164,74 @@ class QarmaHWTest extends AnyFlatSpec with ChiselScalatestTester {
     }
   }
 
+  it should "handle delays" in {
+    // Very similar to the test before this
+    // Just inserts a delay between reads
+
+    // Generate the test vectors randomly
+    val rng = new Random(314159)
+    val test_vecs =
+      Seq.fill(5)(BigInt(64, rng)) zip Seq.fill(5)(BigInt(64, rng))
+
+    // All the hard-coded values
+    val k0 = BigInt("ec2802d4e0a488e9", 16)
+    val k1 = BigInt("ec2802d4e0a488e9", 16)
+    val w0 = BigInt("84be85ce9804e94b", 16)
+    val w1 = BigInt("c25f42e74c0274a4", 16)
+
+    // Make the DUT and the reference
+    val ref = Qarma(
+      rounds = 5,
+      k0 = Block.fromBigInt(k0),
+      k1 = Block.fromBigInt(k1),
+      w0 = Block.fromBigInt(w0),
+      w1 = Block.fromBigInt(w1)
+    )
+    test(new QarmaHW) { c =>
+      c.key.k0.poke(k0.U(64.W))
+      c.key.k1.poke(k1.U(64.W))
+      c.key.w0.poke(w0.U(64.W))
+      c.key.w1.poke(w1.U(64.W))
+
+      // Initialize the channels
+      c.inp.initSource().setSourceClock(c.clock)
+      c.out.initSink().setSinkClock(c.clock)
+
+      parallel(
+        // Try encrypt
+        // Delay some time in between randomly
+        test_vecs.foreach { case (p, t) =>
+          if (rng.nextBoolean())
+            c.clock.step(1)
+          c.inp.enqueue(
+            chiselTypeOf(c.inp.bits).Lit(
+              _.ptext -> p.U(64.W),
+              _.tweak -> t.U(64.W)
+            )
+          )
+        },
+
+        // Check for the expected output
+        // Delay by some time in between
+        test_vecs.foreach { case (p, t) =>
+          c.out.ready.poke(false.B)
+          c.clock.step(5)
+          c.out.expectDequeue(
+            chiselTypeOf(c.out.bits).Lit(
+              _.ptext -> p.U(64.W),
+              _.tweak -> t.U(64.W),
+              _.ctext -> ref(
+                Block.fromBigInt(p),
+                Block.fromBigInt(t)
+              ).toBigInt
+                .U(64.W)
+            )
+          )
+        }
+      )
+    }
+  }
+
   it should "have a latency of at most four cycles" in {
     test(new QarmaHW) { c =>
       // Give everything random values
