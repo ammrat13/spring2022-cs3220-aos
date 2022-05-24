@@ -35,3 +35,4 @@ jobs:
         path: |
           run_dir/QarmaHW.fir
           run_dir/QarmaHW.v
+        if-no-files-found: error
