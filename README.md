@@ -13,8 +13,8 @@ set.
 
 ## Compilation
 
-The code, like [BOOM][3], is written in a Scala DSL called [Chisel][6]. It has
-to be compiled to Verilog (or FIRRTL). Pre-compiled output is available under
+The code, like BOOM, is written in a Scala DSL called [Chisel][6]. It has to be
+compiled to Verilog (or FIRRTL). Pre-compiled output is available under
 *Releases*. Alternatively, the code can be compiled using [`sbt`][7] by running
 ```
 $ sbt run
@@ -26,7 +26,8 @@ listed with
 $ sbt "run --help"
 ```
 
-Regardless, the top module of the compiled HDL is called `QarmaHW`.
+Regardless, the top module of the compiled HDL is called `QarmaHW`. It
+implements five-rounds with the `s1` S-Box and `M = Q = M42`.
 
 
 ## Usage
