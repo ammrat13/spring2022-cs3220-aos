@@ -32,11 +32,13 @@ Regardless, the top module of the compiled HDL is called `QarmaHW`.
 ## Usage
 
 Four of the ports on the `QarmaHW` module are used to specify the key.
-Specifically,
+Specifically, the
+
 * `key_k0`,
 * `key_k1`,
 * `key_w0`, and
 * `key_w1`
+
 ports must each be connected to their corresponding parameter. Note that `k1`
 and `w1` must be set explicitly. Set them according to the computation in the
 [paper][2] for encryption or decryption.
